@@ -97,8 +97,9 @@ public class DatabaseSeeder
         var customers = await _context.Customers.ToListAsync();
         var products = await _context.Products.ToListAsync();
 
+        var orderNumber = 1;
         var purchaseFaker = new Faker<Purchase>()
-            .RuleFor(p => p.Number, (f, p, i) => $"ORD-{(i + 1):D6}") // Sequential 6-digit numbers
+            .RuleFor(p => p.Number, f => $"ORD-{orderNumber++:D6}") // Sequential 6-digit numbers
             .RuleFor(p => p.Date, f => f.Date.Past(1))
             .RuleFor(p => p.Customer, f => f.PickRandom(customers));
 
@@ -108,7 +109,7 @@ public class DatabaseSeeder
             .RuleFor(pi => pi.UnitPrice, (f, pi) => pi.Product.Price);
 
         var purchases = purchaseFaker.Generate(200)
-            .Select((p, index) =>
+            .Select(p =>
             {
                 var items = itemFaker.Generate(_random.Next(1, 5));
                 p.Items = items;
