@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StoreManagement.Application.Common.Interfaces;
 using StoreManagement.Infrastructure.Persistence;
+using StoreManagement.Infrastructure.Persistence.Seeding;
 
 namespace StoreManagement.Infrastructure;
 
@@ -19,6 +20,8 @@ public static class DependencyInjection
 
         services.AddScoped<IApplicationDbContext>(provider =>
             provider.GetRequiredService<ApplicationDbContext>());
+
+        services.AddScoped<DatabaseSeeder>();
 
         return services;
     }

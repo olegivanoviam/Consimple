@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-
 namespace StoreManagement.Application.Customers.Queries.GetPopularCategories;
 
 public class PopularCategoriesView
