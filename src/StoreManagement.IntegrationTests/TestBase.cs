@@ -1,15 +1,17 @@
 using Microsoft.EntityFrameworkCore;
+using NUnit.Framework;
 using StoreManagement.Infrastructure.Persistence;
 using StoreManagement.Infrastructure.Persistence.Seeding;
 
 namespace StoreManagement.IntegrationTests;
 
-public abstract class TestBase : IAsyncLifetime
+public abstract class TestBase
 {
-    protected readonly ApplicationDbContext Context;
-    protected readonly DatabaseSeeder Seeder;
+    protected ApplicationDbContext Context;
+    protected DatabaseSeeder Seeder;
 
-    protected TestBase()
+    [OneTimeSetUp]
+    public void OneTimeSetUp()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseSqlServer("Server=localhost\\SQLEXPRESS;Database=StoreManagement_Tests;Trusted_Connection=True;TrustServerCertificate=true")
@@ -19,14 +21,16 @@ public abstract class TestBase : IAsyncLifetime
         Seeder = new DatabaseSeeder(Context);
     }
 
-    public async Task InitializeAsync()
+    [SetUp]
+    public async Task SetUp()
     {
         await Context.Database.EnsureDeletedAsync();
         await Context.Database.MigrateAsync();
         await Seeder.SeedAsync();
     }
 
-    public async Task DisposeAsync()
+    [OneTimeTearDown]
+    public async Task OneTimeTearDown()
     {
         await Context.DisposeAsync();
     }

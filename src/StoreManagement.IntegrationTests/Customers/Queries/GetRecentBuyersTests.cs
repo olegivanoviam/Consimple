@@ -1,12 +1,13 @@
-using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using NUnit.Framework;
 using StoreManagement.Application.Customers.Queries.GetRecentBuyers;
 
 namespace StoreManagement.IntegrationTests.Customers.Queries;
 
+[TestFixture]
 public class GetRecentBuyersTests : TestBase
 {
-    [Fact]
+    [Test]
     public async Task GetRecentBuyers_ShouldReturnCorrectData()
     {
         // Arrange
@@ -17,19 +18,19 @@ public class GetRecentBuyersTests : TestBase
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Should().NotBeEmpty();
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result, Is.Not.Empty);
         
         // Verify that buyers are ordered by most recent purchase
         var dates = result.Select(b => b.LastPurchaseDate).ToList();
-        dates.Should().BeInDescendingOrder();
+        Assert.That(dates, Is.Ordered.Descending);
 
         // Verify that each buyer exists in the database
         foreach (var buyer in result)
         {
             var customer = await Context.Customers.FindAsync(buyer.Id);
-            customer.Should().NotBeNull();
-            customer!.FullName.Should().Be(buyer.FullName);
+            Assert.That(customer, Is.Not.Null);
+            Assert.That(customer!.FullName, Is.EqualTo(buyer.FullName));
         }
     }
 } 

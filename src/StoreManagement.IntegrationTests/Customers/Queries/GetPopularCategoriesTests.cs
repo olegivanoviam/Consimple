@@ -1,12 +1,13 @@
-using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using NUnit.Framework;
 using StoreManagement.Application.Customers.Queries.GetPopularCategories;
 
 namespace StoreManagement.IntegrationTests.Customers.Queries;
 
+[TestFixture]
 public class GetPopularCategoriesTests : TestBase
 {
-    [Fact]
+    [Test]
     public async Task GetPopularCategories_ShouldReturnCorrectData()
     {
         // Arrange
@@ -19,12 +20,12 @@ public class GetPopularCategoriesTests : TestBase
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        result.Should().NotBeNull();
-        result.Should().NotBeEmpty();
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result, Is.Not.Empty);
 
         // Verify that categories are ordered by total units
         var units = result.Select(c => c.TotalUnits).ToList();
-        units.Should().BeInDescendingOrder();
+        Assert.That(units, Is.Ordered.Descending);
 
         // Verify that total units is calculated correctly
         foreach (var category in result)
@@ -33,7 +34,7 @@ public class GetPopularCategoriesTests : TestBase
                 .Where(pi => pi.Product.Category.Id == category.CategoryId && pi.Purchase.CustomerId == customerId)
                 .SumAsync(pi => pi.Quantity);
 
-            category.TotalUnits.Should().Be(actualUnits);
+            Assert.That(category.TotalUnits, Is.EqualTo(actualUnits));
         }
     }
 } 
