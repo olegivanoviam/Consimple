@@ -9,10 +9,11 @@ namespace StoreManagement.IntegrationTests.Customers.Queries;
 public class GetRecentBuyersTests : TestBase
 {
     [Test]
-    public async Task GetRecentBuyers_ShouldReturnCorrectData()
+    public async Task GetRecentBuyers_WithRangeOfDays_ShouldReturnCorrectData([Range(0, 100, 1)] int lastNDays)
     {
         // Arrange
-        var query = new GetRecentBuyersQuery(30); // Last 30 days
+        var cutoffDate = DateTime.UtcNow.Date.AddDays(-lastNDays);
+        var query = new GetRecentBuyersQuery(lastNDays);
         var handler = new GetRecentBuyersQueryHandler(Context);
 
         // Act
@@ -20,27 +21,33 @@ public class GetRecentBuyersTests : TestBase
 
         // Assert
         result.Should().NotBeNull();
-        result.Should().NotBeEmpty();
-        
-        // Verify that buyers are ordered by most recent purchase
-        var dates = result.Select(b => b.LastPurchaseDate).ToList();
-        dates.Should().BeInDescendingOrder();
 
-        // Verify that each buyer exists in the database
-        foreach (var buyer in result)
+        // Get expected results using direct LINQ query
+        var expectedBuyers = await Context.Customers
+            .Where(c => c.Purchases.Any(p => p.Date >= cutoffDate))
+            .Select(c => new
+            {
+                c.Id,
+                c.FullName,
+                LastPurchaseDate = c.Purchases
+                    .OrderByDescending(p => p.Date)
+                    .Select(p => p.Date)
+                    .First()
+            })
+            .ToListAsync();
+
+        // Compare results
+        result.Should().HaveCount(expectedBuyers.Count, 
+            $"Number of buyers in last {lastNDays} days should match the database query");
+
+        foreach (var expected in expectedBuyers)
         {
-            var customer = await Context.Customers.FindAsync(buyer.Id);
-            customer.Should().NotBeNull();
-            customer!.FullName.Should().Be(buyer.FullName);
+            var actual = result.Should().ContainSingle(
+                b => b.Id == expected.Id,
+                $"Customer {expected.FullName} should be in the results for last {lastNDays} days").Subject;
 
-            // Verify last purchase date
-            var lastPurchase = await Context.Purchases
-                .Where(p => p.CustomerId == buyer.Id)
-                .OrderByDescending(p => p.Date)
-                .FirstOrDefaultAsync();
-
-            lastPurchase.Should().NotBeNull();
-            buyer.LastPurchaseDate.Should().Be(lastPurchase!.Date);
+            actual.FullName.Should().Be(expected.FullName);
+            actual.LastPurchaseDate.Should().Be(expected.LastPurchaseDate);
         }
     }
 } 

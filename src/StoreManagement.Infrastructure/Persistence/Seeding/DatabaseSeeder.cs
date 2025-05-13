@@ -96,11 +96,12 @@ public class DatabaseSeeder
     {
         var customers = await _context.Customers.ToListAsync();
         var products = await _context.Products.ToListAsync();
+        var startDate = DateTime.UtcNow.AddDays(-100);
 
         var orderNumber = 1;
         var purchaseFaker = new Faker<Purchase>()
             .RuleFor(p => p.Number, f => $"ORD-{orderNumber++:D6}") // Sequential 6-digit numbers
-            .RuleFor(p => p.Date, f => f.Date.Past(1))
+            .RuleFor(p => p.Date, f => f.Date.Between(startDate, DateTime.UtcNow))
             .RuleFor(p => p.Customer, f => f.PickRandom(customers));
 
         var itemFaker = new Faker<PurchaseItem>()
@@ -108,7 +109,8 @@ public class DatabaseSeeder
             .RuleFor(pi => pi.Quantity, f => f.Random.Int(1, 5))
             .RuleFor(pi => pi.UnitPrice, (f, pi) => pi.Product.Price);
 
-        var purchases = purchaseFaker.Generate(200)
+        // Generate more purchases to ensure good distribution in the last 100 days
+        var purchases = purchaseFaker.Generate(300)
             .Select(p =>
             {
                 var items = itemFaker.Generate(_random.Next(1, 5));
