@@ -20,14 +20,18 @@ public class DatabaseSeeder
 
     public async Task SeedAsync()
     {
-        await _context.Database.EnsureDeletedAsync();
+        // Only create database if it doesn't exist
         await _context.Database.MigrateAsync();
 
-        // Seed in order to maintain referential integrity
-        await SeedProductCategoriesAsync();
-        await SeedProductsAsync();
-        await SeedCustomersAsync();
-        await SeedPurchasesAsync();
+        // Only seed if there's no data
+        if (!await _context.ProductCategories.AnyAsync())
+        {
+            // Seed in order to maintain referential integrity
+            await SeedProductCategoriesAsync();
+            await SeedProductsAsync();
+            await SeedCustomersAsync();
+            await SeedPurchasesAsync();
+        }
     }
 
     private async Task SeedProductCategoriesAsync()
@@ -94,7 +98,7 @@ public class DatabaseSeeder
         var products = await _context.Products.ToListAsync();
 
         var purchaseFaker = new Faker<Purchase>()
-            .RuleFor(p => p.Number, f => f.Random.Replace("ORD-####-####"))
+            .RuleFor(p => p.Number, (f, p, i) => $"ORD-{(i + 1):D6}") // Sequential 6-digit numbers
             .RuleFor(p => p.Date, f => f.Date.Past(1))
             .RuleFor(p => p.Customer, f => f.PickRandom(customers));
 
@@ -104,13 +108,14 @@ public class DatabaseSeeder
             .RuleFor(pi => pi.UnitPrice, (f, pi) => pi.Product.Price);
 
         var purchases = purchaseFaker.Generate(200)
-            .Select(p =>
+            .Select((p, index) =>
             {
                 var items = itemFaker.Generate(_random.Next(1, 5));
                 p.Items = items;
                 p.TotalAmount = items.Sum(i => i.Quantity * i.UnitPrice);
                 return p;
-            });
+            })
+            .OrderBy(p => p.Date); // Order purchases by date
 
         await _context.Purchases.AddRangeAsync(purchases);
         await _context.SaveChangesAsync();
