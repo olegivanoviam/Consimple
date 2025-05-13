@@ -11,7 +11,7 @@ public abstract class TestBase
     protected DatabaseSeeder Seeder { get; private set; } = null!;
 
     [OneTimeSetUp]
-    public void OneTimeSetUp()
+    public async Task OneTimeSetUp()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseSqlServer("Server=localhost\\SQLEXPRESS;Database=StoreManagement_Tests;Trusted_Connection=True;TrustServerCertificate=true")
@@ -19,20 +19,10 @@ public abstract class TestBase
 
         Context = new ApplicationDbContext(options);
         Seeder = new DatabaseSeeder(Context);
-    }
 
-    [SetUp]
-    public async Task SetUp()
-    {
         await Context.Database.EnsureDeletedAsync();
         await Context.Database.MigrateAsync();
         await Seeder.SeedAsync();
-    }
-
-    [TearDown]
-    public async Task TearDown()
-    {
-        await Context.DisposeAsync();
     }
 
     [OneTimeTearDown]
@@ -41,7 +31,6 @@ public abstract class TestBase
         if (Context != null)
         {
             await Context.Database.EnsureDeletedAsync();
-            await Context.DisposeAsync();
         }
     }
 } 
