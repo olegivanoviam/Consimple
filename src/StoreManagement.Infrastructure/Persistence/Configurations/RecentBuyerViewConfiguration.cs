@@ -4,9 +4,9 @@ using StoreManagement.Application.Customers.Queries.GetRecentBuyers;
 
 namespace StoreManagement.Infrastructure.Persistence.Configurations;
 
-public class RecentBuyerViewConfiguration : IEntityTypeConfiguration<RecentBuyerView>
+public class RecentBuyersViewConfiguration : IEntityTypeConfiguration<RecentBuyersView>
 {
-    public void Configure(EntityTypeBuilder<RecentBuyerView> builder)
+    public void Configure(EntityTypeBuilder<RecentBuyersView> builder)
     {
         builder.HasNoKey();
         

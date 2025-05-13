@@ -17,7 +17,7 @@ public class GetRecentBuyersQueryHandler : IRequestHandler<GetRecentBuyersQuery,
     {
         var cutoffDate = DateTime.UtcNow.Date.AddDays(-request.Days);
 
-        return await _context.Set<RecentBuyerView>()
+        return await _context.Set<RecentBuyersView>()
             .FromSqlInterpolated($@"
                 SELECT 
                     c.Id AS CustomerId,
