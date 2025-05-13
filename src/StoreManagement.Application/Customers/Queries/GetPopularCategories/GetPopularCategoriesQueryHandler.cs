@@ -24,7 +24,7 @@ public class GetPopularCategoriesQueryHandler : IRequestHandler<GetPopularCatego
             throw new InvalidOperationException($"Customer with ID {request.CustomerId} not found.");
         }
 
-        return await _context.Set<PopularCategoryView>()
+        return await _context.Set<PopularCategoriesView>()
             .FromSqlInterpolated($@"
                 WITH CustomerPurchases AS (
                     SELECT 

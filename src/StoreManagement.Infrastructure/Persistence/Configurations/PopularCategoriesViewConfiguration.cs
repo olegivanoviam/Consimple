@@ -4,9 +4,9 @@ using StoreManagement.Application.Customers.Queries.GetPopularCategories;
 
 namespace StoreManagement.Infrastructure.Persistence.Configurations;
 
-public class PopularCategoryViewConfiguration : IEntityTypeConfiguration<PopularCategoryView>
+public class PopularCategoriesViewConfiguration : IEntityTypeConfiguration<PopularCategoriesView>
 {
-    public void Configure(EntityTypeBuilder<PopularCategoryView> builder)
+    public void Configure(EntityTypeBuilder<PopularCategoriesView> builder)
     {
         builder.HasNoKey();
         builder.ToView(null);
