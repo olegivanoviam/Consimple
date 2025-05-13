@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace StoreManagement.Application.Customers.Queries.GetPopularCategories;
 
-[Keyless]
 public class PopularCategoriesView
 {
     public int CategoryId { get; set; }
