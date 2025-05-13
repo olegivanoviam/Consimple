@@ -12,6 +12,9 @@ public class ProductCategoryConfiguration : IEntityTypeConfiguration<ProductCate
             .HasMaxLength(100)
             .IsRequired();
 
+        builder.HasIndex(e => e.Name)
+            .IsUnique();
+
         builder.Property(e => e.Description)
             .HasMaxLength(500);
 
