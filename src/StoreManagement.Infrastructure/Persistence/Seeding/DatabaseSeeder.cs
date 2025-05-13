@@ -44,14 +44,19 @@ public class DatabaseSeeder
             "Health & Beauty"
         };
 
-        var faker = new Faker<ProductCategory>()
-            .RuleFor(c => c.Name, f => f.PickRandom(categories))
-            .RuleFor(c => c.Description, f => f.Commerce.ProductDescription());
+        foreach (var categoryName in categories)
+        {
+            if (!await _context.ProductCategories.AnyAsync(c => c.Name == categoryName))
+            {
+                var faker = new Faker<ProductCategory>()
+                    .RuleFor(c => c.Name, _ => categoryName)
+                    .RuleFor(c => c.Description, f => f.Commerce.ProductDescription());
 
-        var productCategories = faker.Generate(categories.Length);
-
-        await _context.ProductCategories.AddRangeAsync(productCategories);
-        await _context.SaveChangesAsync();
+                var category = faker.Generate();
+                await _context.ProductCategories.AddAsync(category);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 
     private async Task SeedProductsAsync()
