@@ -7,11 +7,10 @@ namespace StoreManagement.IntegrationTests;
 
 public abstract class TestBase
 {
-    protected ApplicationDbContext Context;
-    protected DatabaseSeeder Seeder;
+    protected readonly ApplicationDbContext Context;
+    protected readonly DatabaseSeeder Seeder;
 
-    [OneTimeSetUp]
-    public void OneTimeSetUp()
+    protected TestBase()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseSqlServer("Server=localhost\\SQLEXPRESS;Database=StoreManagement_Tests;Trusted_Connection=True;TrustServerCertificate=true")
@@ -29,8 +28,8 @@ public abstract class TestBase
         await Seeder.SeedAsync();
     }
 
-    [OneTimeTearDown]
-    public async Task OneTimeTearDown()
+    [TearDown]
+    public async Task TearDown()
     {
         await Context.DisposeAsync();
     }
