@@ -1,3 +1,4 @@
+using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using StoreManagement.Application.Customers.Queries.GetRecentBuyers;
@@ -18,19 +19,28 @@ public class GetRecentBuyersTests : TestBase
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        Assert.That(result, Is.Not.Null);
-        Assert.That(result, Is.Not.Empty);
+        result.Should().NotBeNull();
+        result.Should().NotBeEmpty();
         
         // Verify that buyers are ordered by most recent purchase
         var dates = result.Select(b => b.LastPurchaseDate).ToList();
-        Assert.That(dates, Is.Ordered.Descending);
+        dates.Should().BeInDescendingOrder();
 
         // Verify that each buyer exists in the database
         foreach (var buyer in result)
         {
             var customer = await Context.Customers.FindAsync(buyer.Id);
-            Assert.That(customer, Is.Not.Null);
-            Assert.That(customer!.FullName, Is.EqualTo(buyer.FullName));
+            customer.Should().NotBeNull();
+            customer!.FullName.Should().Be(buyer.FullName);
+
+            // Verify last purchase date
+            var lastPurchase = await Context.Purchases
+                .Where(p => p.CustomerId == buyer.Id)
+                .OrderByDescending(p => p.Date)
+                .FirstOrDefaultAsync();
+
+            lastPurchase.Should().NotBeNull();
+            buyer.LastPurchaseDate.Should().Be(lastPurchase!.Date);
         }
     }
 } 

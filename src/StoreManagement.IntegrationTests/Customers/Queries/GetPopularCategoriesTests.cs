@@ -1,3 +1,4 @@
+using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
 using StoreManagement.Application.Customers.Queries.GetPopularCategories;
@@ -20,21 +21,27 @@ public class GetPopularCategoriesTests : TestBase
         var result = await handler.Handle(query, CancellationToken.None);
 
         // Assert
-        Assert.That(result, Is.Not.Null);
-        Assert.That(result, Is.Not.Empty);
+        result.Should().NotBeNull();
+        result.Should().NotBeEmpty();
 
         // Verify that categories are ordered by total units
         var units = result.Select(c => c.TotalUnits).ToList();
-        Assert.That(units, Is.Ordered.Descending);
+        units.Should().BeInDescendingOrder();
 
-        // Verify that total units is calculated correctly
+        // Verify that total units are calculated correctly
         foreach (var category in result)
         {
+            // Verify category exists
+            var dbCategory = await Context.ProductCategories.FindAsync(category.CategoryId);
+            dbCategory.Should().NotBeNull();
+            dbCategory!.Name.Should().Be(category.CategoryName);
+
+            // Verify total units
             var actualUnits = await Context.PurchaseItems
                 .Where(pi => pi.Product.Category.Id == category.CategoryId && pi.Purchase.CustomerId == customerId)
                 .SumAsync(pi => pi.Quantity);
 
-            Assert.That(category.TotalUnits, Is.EqualTo(actualUnits));
+            category.TotalUnits.Should().Be(actualUnits);
         }
     }
 } 
