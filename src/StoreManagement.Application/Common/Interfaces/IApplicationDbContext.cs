@@ -10,5 +10,7 @@ public interface IApplicationDbContext
     DbSet<Purchase> Purchases { get; }
     DbSet<PurchaseItem> PurchaseItems { get; }
 
+    DbSet<TEntity> Set<TEntity>() where TEntity : class;
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

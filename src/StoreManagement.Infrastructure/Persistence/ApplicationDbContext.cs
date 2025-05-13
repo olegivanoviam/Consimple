@@ -16,6 +16,11 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Purchase> Purchases => Set<Purchase>();
     public DbSet<PurchaseItem> PurchaseItems => Set<PurchaseItem>();
 
+    public new DbSet<TEntity> Set<TEntity>() where TEntity : class
+    {
+        return base.Set<TEntity>();
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

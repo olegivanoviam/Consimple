@@ -15,15 +15,23 @@ public class GetRecentBuyersQueryHandler : IRequestHandler<GetRecentBuyersQuery,
 
     public async Task<IEnumerable<RecentBuyerDto>> Handle(GetRecentBuyersQuery request, CancellationToken cancellationToken)
     {
-        var cutoffDate = DateTime.UtcNow.AddDays(-request.Days);
+        var cutoffDate = DateTime.UtcNow.Date.AddDays(-request.Days);
 
-        return await _context.Customers
-            .Where(c => c.Purchases.Any(p => p.Date >= cutoffDate))
-            .Select(c => new RecentBuyerDto(
-                c.Id,
-                c.FullName,
-                c.Purchases.Where(p => p.Date >= cutoffDate)
-                    .Max(p => p.Date)))
+        return await _context.Set<RecentBuyerView>()
+            .FromSqlInterpolated($@"
+                SELECT 
+                    c.Id AS CustomerId,
+                    c.FullName,
+                    MAX(p.Date) AS LastPurchaseDate
+                FROM Customers c
+                INNER JOIN Purchases p ON c.Id = p.CustomerId
+                WHERE p.Date >= {cutoffDate}
+                GROUP BY c.Id, c.FullName")
+            .AsNoTracking()
+            .Select(r => new RecentBuyerDto(
+                r.CustomerId,
+                r.FullName,
+                r.LastPurchaseDate))
             .ToListAsync(cancellationToken);
     }
 }
