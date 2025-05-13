@@ -15,6 +15,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Product> Products => Set<Product>();
     public DbSet<Purchase> Purchases => Set<Purchase>();
     public DbSet<PurchaseItem> PurchaseItems => Set<PurchaseItem>();
+    public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
 
     public new DbSet<TEntity> Set<TEntity>() where TEntity : class
     {

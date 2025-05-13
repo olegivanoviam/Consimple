@@ -9,6 +9,7 @@ public interface IApplicationDbContext
     DbSet<Product> Products { get; }
     DbSet<Purchase> Purchases { get; }
     DbSet<PurchaseItem> PurchaseItems { get; }
+    DbSet<ProductCategory> ProductCategories { get; }
 
     DbSet<TEntity> Set<TEntity>() where TEntity : class;
 

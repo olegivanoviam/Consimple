@@ -20,7 +20,8 @@ public class GetPopularCategoriesQueryHandler : IRequestHandler<GetPopularCatego
             .SelectMany(p => p.Items)
             .GroupBy(pi => pi.Product.Category)
             .Select(g => new CategoryPurchaseDto(
-                g.Key,
+                g.Key.Id,
+                g.Key.Name,
                 g.Sum(pi => pi.Quantity)))
             .ToListAsync(cancellationToken);
     }

@@ -2,12 +2,14 @@ namespace StoreManagement.Application.Customers.Queries.GetPopularCategories;
 
 public class CategoryPurchaseDto
 {
-    public CategoryPurchaseDto(string category, int totalUnits)
+    public CategoryPurchaseDto(int categoryId, string categoryName, int totalUnits)
     {
-        Category = category;
+        CategoryId = categoryId;
+        CategoryName = categoryName;
         TotalUnits = totalUnits;
     }
 
-    public string Category { get; set; }
+    public int CategoryId { get; set; }
+    public string CategoryName { get; set; }
     public int TotalUnits { get; set; }
 }
