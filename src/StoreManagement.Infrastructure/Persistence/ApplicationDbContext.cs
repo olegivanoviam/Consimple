@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using StoreManagement.Application.Common.Interfaces;
 using StoreManagement.Domain.Entities;
-using StoreManagement.Infrastructure.Persistence.Views;
 using System.Reflection;
 
 namespace StoreManagement.Infrastructure.Persistence;
@@ -17,7 +16,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Purchase> Purchases => Set<Purchase>();
     public DbSet<PurchaseItem> PurchaseItems => Set<PurchaseItem>();
     public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
-    public DbSet<PopularCategoriesView> PopularCategoriesView => Set<PopularCategoriesView>();
 
     public new DbSet<TEntity> Set<TEntity>() where TEntity : class
     {
@@ -27,11 +25,6 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-
-        modelBuilder.Entity<PopularCategoriesView>()
-            .HasNoKey()
-            .ToView(null);
-
         base.OnModelCreating(modelBuilder);
     }
 }

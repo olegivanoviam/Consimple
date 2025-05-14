@@ -9,6 +9,11 @@ public class PopularCategoriesViewConfiguration : IEntityTypeConfiguration<Popul
     public void Configure(EntityTypeBuilder<PopularCategoriesView> builder)
     {
         builder.HasNoKey();
+
+        builder.Property(e => e.CategoryId);
+        builder.Property(e => e.CategoryName);
+        builder.Property(e => e.TotalUnits);
+
         builder.ToView(null);
     }
 } 

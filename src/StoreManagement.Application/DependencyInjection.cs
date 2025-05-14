@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using StoreManagement.Application.Common.Behaviors;
+using MediatR;
 
 namespace StoreManagement.Application;
 
