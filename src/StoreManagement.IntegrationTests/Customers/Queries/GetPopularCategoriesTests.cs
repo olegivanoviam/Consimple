@@ -8,40 +8,57 @@ namespace StoreManagement.IntegrationTests.Customers.Queries;
 [TestFixture]
 public class GetPopularCategoriesTests : TestBase
 {
+    private GetPopularCategoriesQueryHandler _handler;
+
+    [OneTimeSetUp]
+    public void SetUpTestData()
+    {
+        _handler = new GetPopularCategoriesQueryHandler(Context);
+    }
+
     [Test]
     public async Task GetPopularCategories_ShouldReturnCorrectData()
     {
         // Arrange
         var customers = await Context.Customers.ToListAsync();
-        var customerId = customers.First().Id;
-        var query = new GetPopularCategoriesQuery(customerId);
-        var handler = new GetPopularCategoriesQueryHandler(Context);
 
-        // Act
-        var result = await handler.Handle(query, CancellationToken.None);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.Should().NotBeEmpty();
-
-        // Verify that categories are ordered by total units
-        var units = result.Select(c => c.TotalUnits).ToList();
-        units.Should().BeInDescendingOrder();
-
-        // Verify that total units are calculated correctly
-        foreach (var category in result)
+        foreach (var customer in customers)
         {
-            // Verify category exists
-            var dbCategory = await Context.ProductCategories.FindAsync(category.CategoryId);
-            dbCategory.Should().NotBeNull();
-            dbCategory!.Name.Should().Be(category.CategoryName);
+            // Get results from handler
+            var query = new GetPopularCategoriesQuery(customer.Id);
+            var handlerResult = await _handler.Handle(query, CancellationToken.None);
 
-            // Verify total units
-            var actualUnits = await Context.PurchaseItems
-                .Where(pi => pi.Product.Category.Id == category.CategoryId && pi.Purchase.CustomerId == customerId)
-                .SumAsync(pi => pi.Quantity);
+            // Get expected results using direct LINQ query
+            var expectedCategories = await Context.ProductCategories
+                .Select(pc => new
+                {
+                    CategoryId = pc.Id,
+                    CategoryName = pc.Name,
+                    TotalUnits = Context.PurchaseItems
+                        .Where(pi => pi.Product.CategoryId == pc.Id &&
+                                   pi.Purchase.CustomerId == customer.Id)
+                        .Sum(pi => pi.Quantity)
+                })
+                .Where(c => c.TotalUnits > 0)
+                .ToListAsync();
 
-            category.TotalUnits.Should().Be(actualUnits);
+            // Assert
+            handlerResult.Should().HaveCount(expectedCategories.Count,
+                $"Customer {customer.Id} should have same number of categories");
+
+            var handlerResults = handlerResult.ToList();
+            for (var i = 0; i < expectedCategories.Count; i++)
+            {
+                var expected = expectedCategories[i];
+                var actual = handlerResults[i];
+
+                actual.CategoryId.Should().Be(expected.CategoryId,
+                    $"Category ID mismatch for customer {customer.Id} at position {i}");
+                actual.CategoryName.Should().Be(expected.CategoryName,
+                    $"Category name mismatch for customer {customer.Id} at position {i}");
+                actual.TotalUnits.Should().Be(expected.TotalUnits,
+                    $"Total units mismatch for customer {customer.Id} at position {i}");
+            }
         }
     }
-} 
+}

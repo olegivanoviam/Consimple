@@ -81,14 +81,37 @@ public class DatabaseSeeder
 
     private async Task SeedCustomersAsync()
     {
+        // Create some fixed birth dates to ensure multiple customers on same dates
+        var sharedBirthDates = new[]
+        {
+            new DateTime(1990, 3, 15),  // 3 customers
+            new DateTime(1985, 3, 15),
+            new DateTime(1995, 3, 15),
+            new DateTime(1988, 7, 20),  // 2 customers
+            new DateTime(1992, 7, 20),
+            new DateTime(1991, 12, 25), // 2 customers
+            new DateTime(1987, 12, 25)
+        };
+
+        // First create customers with shared birth dates
+        var customersWithSharedDates = sharedBirthDates.Select(birthDate => new Customer
+        {
+            FullName = new Faker().Name.FullName(),
+            DateOfBirth = birthDate,
+            RegistrationDate = new Faker().Date.Past(2).Date
+        }).ToList();
+
+        // Then create remaining customers with random birth dates
+        var remainingCount = 50 - customersWithSharedDates.Count;
         var faker = new Faker<Customer>()
             .RuleFor(c => c.FullName, f => f.Name.FullName())
             .RuleFor(c => c.DateOfBirth, f => f.Date.Past(50).Date)
             .RuleFor(c => c.RegistrationDate, f => f.Date.Past(2).Date);
 
-        var customers = faker.Generate(50);
+        var randomCustomers = faker.Generate(remainingCount);
 
-        await _context.Customers.AddRangeAsync(customers);
+        var allCustomers = customersWithSharedDates.Concat(randomCustomers);
+        await _context.Customers.AddRangeAsync(allCustomers);
         await _context.SaveChangesAsync();
     }
 
