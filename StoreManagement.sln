@@ -1,5 +1,4 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -13,7 +12,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StoreManagement.Infrastruct
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StoreManagement.Api", "src\StoreManagement.Api\StoreManagement.Api.csproj", "{FA08C404-899A-45DF-9FBE-B07ABD6E5D33}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StoreManagement.IntegrationTests", "src\StoreManagement.IntegrationTests\StoreManagement.IntegrationTests.csproj", "{C13AAE67-2779-428E-A8FF-28018763469D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StoreManagement.Tests", "src\StoreManagement.Tests\StoreManagement.Tests.csproj", "{C13AAE67-2779-428E-A8FF-28018763469D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
