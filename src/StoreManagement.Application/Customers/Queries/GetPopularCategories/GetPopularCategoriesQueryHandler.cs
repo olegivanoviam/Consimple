@@ -26,25 +26,17 @@ public class GetPopularCategoriesQueryHandler : IRequestHandler<GetPopularCatego
 
         return await _context.Set<PopularCategoriesView>()
             .FromSqlInterpolated($@"
-                WITH CustomerPurchases AS (
-                    SELECT 
-                        pc.Id AS CategoryId,
-                        pc.Name AS CategoryName,
-                        COALESCE(SUM(pi.Quantity), 0) AS TotalUnits
-                    FROM ProductCategories pc
-                    LEFT JOIN Products p ON p.CategoryId = pc.Id
-                    LEFT JOIN PurchaseItems pi ON pi.ProductId = p.Id
-                    LEFT JOIN Purchases pur ON pur.Id = pi.PurchaseId 
-                        AND pur.CustomerId = {request.CustomerId}
-                    GROUP BY pc.Id, pc.Name
-                )
                 SELECT 
-                    CategoryId,
-                    CategoryName,
-                    TotalUnits
-                FROM CustomerPurchases
-                WHERE TotalUnits > 0
-                ORDER BY TotalUnits DESC")
+                    pc.Id AS CategoryId,
+                    pc.Name AS CategoryName,
+                    COALESCE(SUM(pi.Quantity), 0) AS TotalUnits
+                FROM ProductCategories pc
+                LEFT JOIN Products p ON p.CategoryId = pc.Id
+                LEFT JOIN PurchaseItems pi ON pi.ProductId = p.Id
+                LEFT JOIN Purchases pur ON pur.Id = pi.PurchaseId 
+                WHERE pur.CustomerId = {request.CustomerId}
+                GROUP BY pc.Id, pc.Name
+                HAVING COALESCE(SUM(pi.Quantity), 0) > 0")
             .AsNoTracking()
             .Select(v => new CategoryPurchaseDto(
                 v.CategoryId,
